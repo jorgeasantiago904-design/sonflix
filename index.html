@@ -189,6 +189,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Strict Four Column Matrix Row Layout config */
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -196,13 +197,10 @@
             margin-bottom: 50px;
         }
 
-        @media (max-width: 1000px) {
-            .movie-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 700px) {
+        @media (max-width: 900px) {
             .movie-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        @media (max-width: 480px) {
+        @media (max-width: 500px) {
             .movie-grid { grid-template-columns: 1fr; }
         }
 
@@ -267,7 +265,6 @@
             width: 80%;
         }
 
-        /* Save Plus Button styling inside tile bottom right */
         .tile-save-btn {
             position: absolute;
             bottom: 12px;
@@ -649,7 +646,6 @@
         let spotlightIndex = 0;
         let spotlightIntervalId = null;
 
-        // Reactive storage engines for lists
         let savedWatchlist = JSON.parse(localStorage.getItem('cs_saved_watchlist')) || [];
         let continueWatching = JSON.parse(localStorage.getItem('cs_continue_history')) || [];
         let viewingSavedOnlyMode = false;
@@ -669,11 +665,11 @@
         }
 
         function renderListGrids() {
-            // Render Continue Watching Row Layout
+            // Render Continue Watching Row Layout - Sliced strictly to 4 items
             if (continueWatching.length > 0) {
                 $('continue-row-heading').style.display = 'block';
                 $('continue-grid').style.display = 'grid';
-                renderInterfaceCards(continueWatching, 'continue-grid');
+                renderInterfaceCards(continueWatching.slice(0, 4), 'continue-grid');
             } else {
                 $('continue-row-heading').style.display = 'none';
                 $('continue-grid').style.display = 'none';
@@ -681,10 +677,13 @@
 
             // Render Watchlist Data
             if (savedWatchlist.length > 0) {
-                renderInterfaceCards(savedWatchlist, 'saved-grid');
                 if (viewingSavedOnlyMode) {
                     $('saved-row-heading').style.display = 'block';
                     $('saved-grid').style.display = 'grid';
+                    // Show all when viewing full "My List" screen layout
+                    renderInterfaceCards(savedWatchlist, 'saved-grid');
+                } else {
+                    renderInterfaceCards(savedWatchlist.slice(0, 4), 'saved-grid');
                 }
             } else {
                 $('saved-grid').innerHTML = '';
@@ -728,6 +727,7 @@
                 if (data.results && data.results.length > 0) {
                     $('search-row-heading').innerText = `Search Results for "${query}"`;
                     const validItems = data.results.filter(item => item.backdrop_path && (item.media_type === 'movie' || item.media_type === 'tv'));
+                    // Search gives ALL matching items
                     renderInterfaceCards(validItems, 'search-grid');
                 } else {
                     $('search-row-heading').innerText = `No results found for "${query}"`;
@@ -786,7 +786,8 @@
                 if (data.results && data.results.length > 0) {
                     spotlightItems = [...spotlightItems, ...data.results.slice(0, 2)];
                     const typedItems = data.results.map(item => ({ ...item, media_type: type }));
-                    renderInterfaceCards(typedItems, targetLayoutElement);
+                    // Slicing to exactly 4 items for standard rows
+                    renderInterfaceCards(typedItems.slice(0, 4), targetLayoutElement);
                 }
             } catch (err) {
                 console.error(err);
@@ -815,7 +816,6 @@
                     </button>
                 `;
 
-                // Handle click on card wrapper separating trigger mechanics
                 card.addEventListener('click', (e) => {
                     if (e.target.classList.contains('tile-save-btn')) {
                         e.stopPropagation();
@@ -850,7 +850,6 @@
             }
             localStorage.setItem('cs_saved_watchlist', JSON.stringify(savedWatchlist));
             
-            // Re-render UI segments globally to update state indicators
             renderListGrids();
             if(!viewingSavedOnlyMode && !$('search-input').value.trim()) {
                 loadCatalogRows();
@@ -973,7 +972,6 @@
         function launchActiveStream() {
             if(!currentMediaItem) return;
             
-            // Append item into Continue Watching memory registry pipeline
             const historyIdx = continueWatching.findIndex(h => h.id === currentMediaItem.id);
             if (historyIdx > -1) {
                 continueWatching.splice(historyIdx, 1);
@@ -984,7 +982,7 @@
             document.body.style.overflow = 'hidden';
             $('theater-mode').style.display = 'flex';
 
-            const root = $('player-iframe-root');
+            const root = PlaybackIframeContainer = $('player-iframe-root');
 
             if(currentMediaType === 'movie') {
                 root.innerHTML = `<iframe src="https://www.vidking.net/embed/movie/${currentMediaItem.id}" allowfullscreen></iframe>`;
@@ -1001,7 +999,6 @@
             $('details-menu').style.display = 'none'; 
             document.body.style.overflow = 'auto'; 
             
-            // Dynamic refresh grid rows to display continue tracking item immediate
             if(viewingSavedOnlyMode) {
                 toggleSavedWatchlistOnly();
             } else {
