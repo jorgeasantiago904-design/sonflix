@@ -16,14 +16,12 @@
             --primary-card-bg: #161B22;
             --border-color: rgba(200, 225, 255, 0.1);
             --accent-red: #E50914;
-            --accent-color: #388BFD;
+            --accent-color: #E50914; 
             --text-primary: #E6EDF3;
             --text-secondary: #7D8590;
             --shadow-color: rgba(0, 0, 0, 0.5);
-            --tag-new-release-bg: #388BFD;
-            --tag-top-pick-bg: #D4AF37;
+            --tag-top-pick-bg: #E50914; 
             --tag-fan-favorite-bg: #238636;
-            --tag-not-released-bg: #F57C00;
             --sidebar-width: 240px;
         }
 
@@ -108,6 +106,13 @@
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-color); }
         input:checked + .slider:before { transform: translateX(24px); }
+        
+        .settings-select {
+            background: #0D1117; border: 1px solid var(--border-color); color: white;
+            padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; font-family: inherit; font-size: 0.95rem;
+            min-width: 150px; cursor: pointer;
+        }
+        .settings-select:focus { border-color: var(--accent-color); outline: none; }
 
         /* ==================== TV CUSTOM INPUT COMPONENT ==================== */
         .tv-custom-input-box {
@@ -117,11 +122,12 @@
         .tv-inputs-row { display: flex; gap: 1rem; }
         .input-group { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
         .input-group label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
-        .input-group input {
+        .input-group select {
             background: #0D1117; border: 1px solid var(--border-color); color: white;
             padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; font-family: inherit; font-size: 0.95rem;
+            cursor: pointer;
         }
-        .input-group input:focus { border-color: var(--accent-color); outline: none; }
+        .input-group select:focus { border-color: var(--accent-color); outline: none; }
         
         /* Episode Preview Frame */
         .episode-live-preview {
@@ -295,19 +301,11 @@
             aspect-ratio: 16 / 9;
         }
 
-        /* Standard Cards Hover Animation (Pop Up & Scale) */
-        .movie-card:not(.is-unreleased):hover {
-            transform: scale(1.05) translateY(-5px);
+        /* Unified Hover Animation (No Pop Up/No Scale Up - Only Glow Border) */
+        .movie-card:hover {
             z-index: 10;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             border-color: var(--accent-color);
-        }
-
-        /* Unreleased / Not Released Cards Hover Rule: NO POP UP / NO SCALE UP */
-        .movie-card.is-unreleased:hover {
-            z-index: 10;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            border-color: var(--tag-not-released-bg);
         }
 
         .card-image-container {
@@ -386,10 +384,8 @@
             padding: 0.5rem 0.6rem 0.5rem 1.2rem; font-size: 0.75rem; font-weight: 700;
             text-transform: uppercase; clip-path: polygon(100% 0, 100% 100%, 50% 85%, 0 100%, 0 0);
         }
-        .card-tag-ribbon.new-release { background-color: var(--tag-new-release-bg); }
-        .card-tag-ribbon.top-pick { background-color: var(--tag-top-pick-bg); }
+        .card-tag-ribbon.top-pick { background-color: var(--tag-top-pick-bg); color: white; }
         .card-tag-ribbon.fan-favorite { background-color: var(--tag-fan-favorite-bg); }
-        .card-tag-ribbon.not-released { background-color: var(--tag-not-released-bg); }
 
         .placeholder-message {
             color: var(--text-secondary); padding: 2rem; text-align: center; font-size: 1.2rem;
@@ -546,12 +542,12 @@
                 <div id="modal-tv-inputs-container" class="tv-custom-input-box" style="display: none;">
                     <div class="tv-inputs-row">
                         <div class="input-group">
-                            <label for="custom-season-input">Season</label>
-                            <input type="number" id="custom-season-input" min="1" value="1">
+                            <label for="custom-season-select">Season</label>
+                            <select id="custom-season-select"></select>
                         </div>
                         <div class="input-group">
-                            <label for="custom-episode-input">Episode</label>
-                            <input type="number" id="custom-episode-input" min="1" value="1">
+                            <label for="custom-episode-select">Episode</label>
+                            <select id="custom-episode-select"></select>
                         </div>
                     </div>
                     
@@ -607,21 +603,22 @@
         
         let watchlist = JSON.parse(localStorage.getItem('cinehub_watchlist')) || [];
         let autoplayEnabled = JSON.parse(localStorage.getItem('cinehub_autoplay')) ?? true;
+        let defaultServer = localStorage.getItem('cinehub_server') || 'vidlink';
 
         const movieServers = {
-            vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=388BFD',
+            vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=E50914', 
             vidking: 'https://www.vidking.net/embed/movie/{tmdb}'
         };
 
         const tvServers = {
-            vidlink: 'https://vidlink.pro/tv/{tmdb}/{s}/{e}?primaryColor=388BFD',
+            vidlink: 'https://vidlink.pro/tv/{tmdb}/{s}/{e}?primaryColor=E50914',
             vidking: 'https://www.vidking.net/embed/tv/{tmdb}/{s}/{e}'
         };
 
         let activeItemContext = null;
         let selectedSeason = 1;
         let selectedEpisode = 1;
-        let selectedServer = 'vidlink';
+        let selectedServer = defaultServer;
         let hudTimeout = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -634,14 +631,22 @@
                 if(e.target === document.getElementById('details-modal-overlay')) closeModalSystem();
             });
 
-            document.getElementById('custom-season-input').addEventListener('input', syncLiveEpisodeMetadata);
-            document.getElementById('custom-episode-input').addEventListener('input', syncLiveEpisodeMetadata);
+            document.getElementById('custom-season-select').addEventListener('change', async (e) => {
+                if(activeItemContext && activeItemContext.type === 'series') {
+                    await populateEpisodes(activeItemContext.id, e.target.value);
+                    syncLiveEpisodeMetadata();
+                }
+            });
+            document.getElementById('custom-episode-select').addEventListener('change', syncLiveEpisodeMetadata);
 
             document.getElementById('fullscreen-player-page').addEventListener('mousemove', triggerBackBtnVisibilityTracker);
 
             setupDropdownTriggers();
             setupNavigation();
             switchView('dashboard');
+            
+            const currentOption = document.querySelector(`#player-server-options .custom-option[data-value="${defaultServer}"]`);
+            if(currentOption) document.querySelector('#player-server-trigger span').innerText = currentOption.innerText;
         });
 
         function triggerBackBtnVisibilityTracker() {
@@ -735,6 +740,17 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h3>Default Video Player</h3>
+                                <p>Select the engine used to stream movies and TV series globally.</p>
+                            </div>
+                            <select id="settings-server-select" class="settings-select">
+                                <option value="vidlink" ${defaultServer === 'vidlink' ? 'selected' : ''}>VidLink Core</option>
+                                <option value="vidking" ${defaultServer === 'vidking' ? 'selected' : ''}>VidKing Core</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             `;
@@ -742,16 +758,37 @@
                 autoplayEnabled = e.target.checked;
                 localStorage.setItem('cinehub_autoplay', JSON.stringify(autoplayEnabled));
             });
+
+            document.getElementById('settings-server-select').addEventListener('change', (e) => {
+                defaultServer = e.target.value;
+                localStorage.setItem('cinehub_server', defaultServer);
+                selectedServer = defaultServer; 
+                
+                const currentOption = document.querySelector(`#player-server-options .custom-option[data-value="${defaultServer}"]`);
+                if(currentOption) document.querySelector('#player-server-trigger span').innerText = currentOption.innerText;
+            });
+        }
+
+        async function populateEpisodes(tvId, seasonNum) {
+            try {
+                const res = await fetch(`${TMDB}/tv/${tvId}/season/${seasonNum}?api_key=${KEY}`);
+                const data = await res.json();
+                const epSelect = document.getElementById('custom-episode-select');
+                epSelect.innerHTML = '';
+                const epCount = data.episodes ? data.episodes.length : 1;
+                for(let i = 1; i <= epCount; i++) {
+                    epSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                }
+            } catch(e) {
+                console.error("Failed to populate episodes", e);
+            }
         }
 
         async function syncLiveEpisodeMetadata() {
             if (!activeItemContext || activeItemContext.type !== 'series') return;
             
-            let seasonNum = parseInt(document.getElementById('custom-season-input').value) || 1;
-            let episodeNum = parseInt(document.getElementById('custom-episode-input').value) || 1;
-
-            if(seasonNum < 1) seasonNum = 1;
-            if(episodeNum < 1) episodeNum = 1;
+            let seasonNum = parseInt(document.getElementById('custom-season-select').value) || 1;
+            let episodeNum = parseInt(document.getElementById('custom-episode-select').value) || 1;
 
             const titleEl = document.getElementById('live-episode-title');
             const summaryEl = document.getElementById('live-episode-summary');
@@ -826,9 +863,8 @@
             const tvInputs = document.getElementById('modal-tv-inputs-container');
             if (item.type === 'series') {
                 tvInputs.style.display = 'flex';
-                document.getElementById('custom-season-input').value = 1;
-                document.getElementById('custom-episode-input').value = 1;
-                syncLiveEpisodeMetadata();
+                document.getElementById('custom-season-select').innerHTML = '<option value="1">1</option>';
+                document.getElementById('custom-episode-select').innerHTML = '<option value="1">1</option>';
             } else {
                 tvInputs.style.display = 'none';
             }
@@ -840,6 +876,17 @@
                 const detail = await res.json();
                 document.getElementById('modal-movie-desc').innerText = detail.overview || "No text data layout index discovered.";
                 if (detail.backdrop_path) activeItemContext.backdropUrl = `${IMGB}${detail.backdrop_path}`;
+                
+                if (item.type === 'series') {
+                    const seasonSelect = document.getElementById('custom-season-select');
+                    seasonSelect.innerHTML = '';
+                    const sCount = detail.number_of_seasons || 1;
+                    for(let i = 1; i <= sCount; i++) {
+                        seasonSelect.innerHTML += `<option value="${i}">${i}</option>`;
+                    }
+                    await populateEpisodes(item.id, 1);
+                    syncLiveEpisodeMetadata();
+                }
             } catch (err) { console.error(err); }
         }
 
@@ -921,7 +968,7 @@
                         title: item.title || item.name,
                         rating: `★ ${item.vote_average.toFixed(1)}`,
                         type: item.media_type === 'tv' ? 'series' : 'movie',
-                        tag: 'new-release',
+                        tag: item.vote_average >= 7.8 ? 'top-pick' : 'none', 
                         imageUrl: `${IMGP}${item.poster_path}`,
                         backdropUrl: `${IMGB}${item.backdrop_path}`
                     }));
@@ -930,7 +977,6 @@
                     createCategorySection("Featured Spotlights", mappedTrending, container, true);
                 }
 
-                // Gather Upcoming / Unreleased content row for the home screen layout dashboard
                 const upcomingRes = await fetch(`${TMDB}/movie/upcoming?api_key=${KEY}&page=1`);
                 const upcomingData = await upcomingRes.json();
                 if(upcomingData.results && upcomingData.results.length > 0) {
@@ -939,7 +985,7 @@
                         title: item.title,
                         rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
                         type: 'movie',
-                        tag: 'not-released',
+                        tag: 'none', 
                         imageUrl: `${IMGP}${item.poster_path}`,
                         backdropUrl: `${IMGB}${item.backdrop_path}`
                     }));
@@ -988,7 +1034,7 @@
                 const items = data.results.map(item => {
                     let dynamicTag = item.vote_average >= 7.8 ? 'top-pick' : 'none';
                     if (forceUpcomingOnly) {
-                        dynamicTag = 'not-released';
+                        dynamicTag = 'none';
                     }
                     return {
                         id: item.id,
@@ -1012,9 +1058,6 @@
                 let tagMarkup = '';
                 if (item.tag && item.tag !== 'none') {
                     tagMarkup = `<div class="card-tag-ribbon ${item.tag}">${item.tag.replace('-', ' ')}</div>`;
-                    if (item.tag === 'not-released') {
-                        card.classList.add('is-unreleased');
-                    }
                 }
                 
                 let imgSrc = (isRectangular && item.backdropUrl) ? item.backdropUrl : item.imageUrl;
