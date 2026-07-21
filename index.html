@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>son-flix Dashboard Blueprint</title>
+    <title>son-flix</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -78,9 +78,9 @@
         body.sidebar-open .hamburger-btn span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
         .main-container {
-            max-width: 1200px;
+            max-width: 95%;
             margin: 0 auto;
-            padding: 80px 1.5rem 40px 1.5rem;
+            padding: 80px 0 40px 0;
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
@@ -91,18 +91,69 @@
         }
         body.sidebar-open .main-header { padding-left: calc(var(--sidebar-width) + 2.5%); }
         .header-left { display: flex; align-items: center; gap: 1rem; }
+        .header-right { display: flex; align-items: center; gap: 1rem; }
         .main-title { font-size: 1.8rem; font-weight: 700; margin: 0; }
         .main-title .highlight { color: var(--accent-red); }
 
-        /* ==================== SETTINGS CONTROLS ==================== */
-        .settings-card { 
-            background: var(--primary-card-bg); 
-            border: 1px solid var(--border-color); 
-            border-radius: 12px; 
-            padding: 2rem; 
-            max-width: 600px; 
-            margin: 2rem auto; 
+        .header-search-btn {
+            background: #161B22; border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s ease;
         }
+        .header-search-btn:hover { border-color: var(--accent-color); color: white; }
+
+        /* ==================== CENTERED SEARCH SECTION ==================== */
+        .centered-search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem 2rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .centered-search-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        
+        .centered-search-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-section-bar {
+            display: flex; flex-direction: column; gap: 1.25rem; width: 100%; align-items: center;
+        }
+        .search-input-wrapper {
+            position: relative; width: 100%;
+        }
+        .search-input-wrapper i {
+            position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 1.2rem;
+        }
+        .search-input-box {
+            width: 100%; background: #161B22; border: 1px solid var(--border-color);
+            padding: 1.1rem 1rem 1.1rem 3.2rem; border-radius: 30px; color: white;
+            font-family: inherit; font-size: 1.1rem; font-weight: 600; box-sizing: border-box;
+            transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .search-input-box:focus { border-color: var(--accent-color); outline: none; box-shadow: 0 8px 24px rgba(229, 9, 20, 0.2); }
+
+        .filter-toggle-group {
+            display: flex; background: #161B22; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; padding: 3px;
+        }
+        .filter-btn {
+            background: none; border: none; color: var(--text-secondary); padding: 0.6rem 1.5rem;
+            font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; border-radius: 16px;
+        }
+        .filter-btn.active { background: var(--accent-color); color: white; }
+
+        /* ==================== SETTINGS CONTROLS ==================== */
+        .settings-card { background: var(--primary-card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; max-width: 600px; margin: 2rem 0; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .setting-item:last-child { border-bottom: none; }
         .setting-info h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; }
@@ -123,27 +174,27 @@
 
         /* ==================== TV CUSTOM INPUT COMPONENT ==================== */
         .tv-custom-input-box {
-            background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color);
-            border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem; align-items: center;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
         }
-        .tv-inputs-row { display: flex; gap: 1rem; width: 100%; justify-content: center; }
-        .input-group { flex: 1; max-width: 200px; display: flex; flex-direction: column; gap: 0.4rem; text-align: center; }
+        .tv-inputs-row { display: flex; gap: 1rem; }
+        .input-group { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
         .input-group label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
         .input-group select {
             background: #0D1117; border: 1px solid var(--border-color); color: white;
-            padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; font-family: inherit; font-size: 0.95rem;
-            cursor: pointer; text-align: center;
+            padding: 0.65rem 1rem; border-radius: 8px; font-weight: 600; font-family: inherit; font-size: 0.95rem;
+            cursor: pointer;
         }
         .input-group select:focus { border-color: var(--accent-color); outline: none; }
         
         /* Episode Preview Frame */
         .episode-live-preview {
             display: flex; gap: 1rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 0.75rem;
-            border: 1px dashed rgba(255, 255, 255, 0.1); align-items: center; width: 100%; box-sizing: border-box;
+            border: 1px dashed rgba(255, 255, 255, 0.1); align-items: center;
         }
         .episode-thumb-frame { width: 130px; aspect-ratio: 16 / 9; border-radius: 6px; background: #0b0e14; overflow: hidden; flex-shrink: 0; }
         .episode-thumb-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .episode-details-meta { flex-grow: 1; text-align: left; }
+        .episode-details-meta { flex-grow: 1; }
         .episode-live-title { font-weight: 700; font-size: 0.95rem; margin: 0 0 0.25rem 0; color: #fff; }
         .episode-live-summary { font-size: 0.8rem; color: var(--text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -165,8 +216,7 @@
             background-size: cover;
             background-position: center top;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
         }
 
         .hero-overlay {
@@ -175,20 +225,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(13,17,23,0.4) 0%, rgba(13,17,23,0.85) 70%, var(--bg-color) 100%),
-                        linear-gradient(to top, var(--bg-color) 0%, transparent 60%);
+            background: linear-gradient(to top, var(--bg-color) 0%, rgba(13,17,23,0.8) 20%, rgba(13,17,23,0.2) 60%, transparent 100%);
+            z-index: 1;
+        }
+
+        .hero-left-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(13,17,23,0.95) 0%, transparent 100%);
             z-index: 1;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            padding: 3rem;
-            max-width: 700px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 3rem 4rem;
+            max-width: 650px;
+            margin-bottom: 1rem;
             animation: slideUpHero 0.8s ease-out;
         }
 
@@ -213,7 +269,6 @@
             color: #4ade80;
             margin-bottom: 1.2rem;
             align-items: center;
-            justify-content: center;
         }
         .hero-meta span.year { color: var(--text-secondary); }
 
@@ -229,7 +284,7 @@
             overflow: hidden;
         }
 
-        .hero-buttons { display: flex; gap: 1rem; justify-content: center; }
+        .hero-buttons { display: flex; gap: 1rem; }
         
         .hero-btn {
             padding: 0.8rem 2rem;
@@ -247,7 +302,7 @@
         .hero-btn.play:hover { background-color: rgba(255,255,255,0.75); transform: scale(1.03); }
 
         /* ==================== CONTENT CATEGORY & GRID SYSTEMS ==================== */
-        .category-container { margin-bottom: 3rem; text-align: left; }
+        .category-container { margin-bottom: 3.5rem; }
         .category-container h2 {
             font-size: 1.6rem;
             margin-bottom: 1rem;
@@ -280,7 +335,6 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 1.5rem;
             padding: 1rem 0;
-            justify-content: center;
         }
 
         /* ==================== MOVIE CARDS ==================== */
@@ -307,6 +361,7 @@
             z-index: 10;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             border-color: var(--accent-color);
+            transform: translateY(-5px);
         }
 
         .card-image-container {
@@ -325,8 +380,6 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            align-items: center;
-            text-align: center;
             background: linear-gradient(to top, rgba(13, 17, 23, 0.95) 40%, transparent 100%);
             opacity: 0;
             transform: translateY(15px);
@@ -344,13 +397,11 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
         }
 
         .card-info {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.75rem;
             margin-top: 0.4rem;
             font-size: 0.8rem;
@@ -359,17 +410,6 @@
             text-transform: capitalize;
         }
         .card-rating { color: #4ade80; }
-
-        .card-action-btn {
-            background-color: rgba(13, 17, 23, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white; width: 36px; height: 36px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; backdrop-filter: blur(4px);
-        }
-        .card-action-btn:hover { background-color: white; color: var(--bg-color); border-color: white; transform: scale(1.1); }
-        .card-action-btn.play { background-color: white; color: var(--bg-color); border-color: white; }
-        .card-action-btn.added { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
 
         .card-tag-ribbon {
             position: absolute; top: -4px; right: 8px; z-index: 4; color: white;
@@ -380,11 +420,11 @@
         .card-tag-ribbon.fan-favorite { background-color: var(--tag-fan-favorite-bg); }
 
         .placeholder-message {
-            color: var(--text-secondary); padding: 3rem 2rem; text-align: center; font-size: 1.2rem;
-            border: 1px dashed var(--border-color); border-radius: 8px; width: 100%; grid-column: 1 / -1; box-sizing: border-box;
+            color: var(--text-secondary); padding: 2.5rem; text-align: center; font-size: 1.1rem;
+            border: 1px dashed var(--border-color); border-radius: 8px; width: 100%; box-sizing: border-box; grid-column: 1 / -1;
         }
 
-        /* ==================== INTERACTIVE BLURRED MIDDLE MODAL ==================== */
+        /* ==================== REMIXED INTERACTIVE MODAL ==================== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(5, 5, 10, 0.85); backdrop-filter: blur(8px);
@@ -395,14 +435,14 @@
         
         .details-modal {
             background-color: #161B22; border: 1px solid var(--border-color);
-            width: 90%; max-width: 680px; border-radius: 16px; overflow: hidden;
+            width: 90%; max-width: 720px; border-radius: 16px; overflow: hidden;
             position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.8);
             transform: scale(0.9) translateY(20px); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex; flex-direction: column; max-height: 85vh; text-align: center;
+            display: flex; flex-direction: column; max-height: 85vh;
         }
         .modal-overlay.active .details-modal { transform: scale(1) translateY(0); }
 
-        .modal-hero { position: relative; width: 100%; height: 260px; background-size: cover; background-position: center; }
+        .modal-hero { position: relative; width: 100%; height: 280px; background-size: cover; background-position: center; }
         .modal-hero-vignette { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to top, #161B22 0%, rgba(22, 27, 34, 0.4) 60%, transparent 100%); }
         .close-modal-btn {
             position: absolute; top: 1rem; right: 1rem; background: rgba(13,17,23,0.6);
@@ -412,10 +452,11 @@
         }
         .close-modal-btn:hover { background: white; color: black; transform: scale(1.08); }
 
-        .modal-body { padding: 1.5rem 2rem; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; align-items: center; }
-        .modal-title { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .modal-meta { display: flex; gap: 1rem; font-size: 0.9rem; font-weight: 600; color: #4ade80; margin-bottom: 1rem; justify-content: center; }
-        .modal-desc { color: var(--text-primary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem; max-width: 580px; }
+        .modal-body { padding: 1.5rem 2.2rem; overflow-y: auto; flex-grow: 1; }
+        .modal-title-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; gap: 1rem; }
+        .modal-title { font-size: 2.2rem; font-weight: 800; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2; }
+        .modal-meta { display: flex; gap: 0.75rem; font-size: 0.85rem; font-weight: 700; color: #4ade80; background: rgba(74, 222, 128, 0.1); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2); flex-shrink: 0; }
+        .modal-desc { color: var(--text-primary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem; }
 
         .custom-dropdown { position: relative; flex: 1; }
         .custom-dropdown-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 4px; display: block; }
@@ -432,14 +473,14 @@
         .custom-option { padding: 0.6rem 1rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
         .custom-option:hover { background: var(--accent-color); color: white; }
 
-        .modal-actions { display: flex; gap: 1rem; margin-top: 1rem; width: 100%; max-width: 480px; justify-content: center; }
+        .modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.5rem; }
         .modal-btn {
-            flex: 1; padding: 0.85rem; border-radius: 8px; font-weight: 700; font-size: 1rem;
-            cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
+            flex: 1; padding: 0.95rem; border-radius: 10px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 0.6rem; transition: all 0.2s;
         }
-        .modal-btn.primary { background: white; color: black; }
-        .modal-btn.primary:hover { background: rgba(255,255,255,0.85); transform: translateY(-2px); }
-        .modal-btn.secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid var(--border-color); }
+        .modal-btn.primary { background: var(--accent-color); color: white; }
+        .modal-btn.primary:hover { background: #f40612; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4); }
+        .modal-btn.secondary { background: rgba(255, 255, 255, 0.08); color: white; border: 1px solid var(--border-color); }
         .modal-btn.secondary:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
         
         /* ==================== FULLSCREEN STREAM VIEWPORT ==================== */
@@ -476,17 +517,17 @@
         .player-hud-overlay {
             width: 100%; padding: 4rem 3rem 3rem 3rem; box-sizing: border-box;
             background: linear-gradient(to top, var(--bg-color) 0%, rgba(13, 17, 23, 0.9) 60%, transparent 100%);
-            z-index: 5100; position: relative; text-align: center;
+            z-index: 5100; position: relative;
         }
 
         .player-hud-title { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; margin: 0 0 0.5rem 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .player-hud-meta { display: flex; gap: 1rem; color: #4ade80; font-weight: 600; margin-bottom: 2rem; justify-content: center; }
+        .player-hud-meta { display: flex; gap: 1rem; color: #4ade80; font-weight: 600; margin-bottom: 2rem; }
         .player-controls-container {
-            display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; justify-content: center;
+            display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;
             background: rgba(0, 0, 0, 0.4); padding: 1.5rem; border-radius: 12px;
-            border: 1px solid var(--border-color); backdrop-filter: blur(10px); max-width: 500px; margin: 0 auto;
+            border: 1px solid var(--border-color); backdrop-filter: blur(10px);
         }
-        .player-controls-container .custom-dropdown { flex: unset; min-width: 220px; }
+        .player-controls-container .custom-dropdown { flex: unset; min-width: 180px; }
         .video-iframe-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 5150; display: none; }
         .video-iframe-container iframe { width: 100%; height: 100%; border: none; }
     </style>
@@ -494,15 +535,15 @@
 <body>
 
     <nav id="sidebar" class="sidebar">
-        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; text-align: center;">
+        <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem;">
             <h2 style="margin:0; font-size:1.5rem;">net<span class="highlight">-</span>flix</h2>
         </div>
         <ul class="sidebar-nav">
             <li><a href="#" class="sidebar-link active" data-view="dashboard"><i class="fas fa-chart-line fa-fw"></i><span>Dashboard</span></a></li>
+            <li><a href="#" class="sidebar-link" data-view="search"><i class="fas fa-search fa-fw"></i><span>Search</span></a></li>
             <li><a href="#" class="sidebar-link" data-view="trending"><i class="fas fa-fire fa-fw"></i><span>Trending</span></a></li>
             <li><a href="#" class="sidebar-link" data-view="movies"><i class="fas fa-film fa-fw"></i><span>Movies</span></a></li>
             <li><a href="#" class="sidebar-link" data-view="series"><i class="fas fa-tv fa-fw"></i><span>TV Series</span></a></li>
-            <li><a href="#" class="sidebar-link" data-view="not-released"><i class="fas fa-calendar-alt fa-fw"></i><span>Coming Soon</span></a></li>
             <li class="nav-separator"></li>
             <li><a href="#" class="sidebar-link" data-view="watchlist"><i class="fas fa-list fa-fw"></i><span>My List</span></a></li>
         </ul>
@@ -518,6 +559,12 @@
                 <button id="hamburger-btn" class="hamburger-btn" title="Open Menu"><span></span><span></span><span></span></button>
                 <h1 class="main-title">net<span class="highlight">-</span>flix</h1>
             </div>
+            <div class="header-right">
+                <button id="header-search-btn" class="header-search-btn" title="Search Everything">
+                    <i class="fas fa-search"></i>
+                    <span>Search</span>
+                </button>
+            </div>
         </header>
 
         <section id="content-container"></section>
@@ -528,9 +575,13 @@
             <button id="close-modal-btn" class="close-modal-btn" title="Close"><i class="fas fa-times"></i></button>
             <div id="modal-hero-banner" class="modal-hero"><div class="modal-hero-vignette"></div></div>
             <div class="modal-body">
-                <h2 id="modal-movie-title" class="modal-title">Movie Title</h2>
-                <div id="modal-movie-meta" class="modal-meta">★ Movie</div>
+                <div class="modal-title-header">
+                    <h2 id="modal-movie-title" class="modal-title">Movie Title</h2>
+                    <div id="modal-movie-meta" class="modal-meta">★ Movie</div>
+                </div>
                 
+                <p id="modal-movie-desc" class="modal-desc">Description</p>
+
                 <div id="modal-tv-inputs-container" class="tv-custom-input-box" style="display: none;">
                     <div class="tv-inputs-row">
                         <div class="input-group">
@@ -549,15 +600,13 @@
                         </div>
                         <div class="episode-details-meta">
                             <h4 id="live-episode-title" class="episode-live-title">Loading Episode Info...</h4>
-                            <p id="live-episode-summary" class="episode-live-summary">Type or adjust your episode target parameters using the standard tracking blocks.</p>
+                            <p id="live-episode-summary" class="episode-live-summary">Adjust your season or episode parameters above to preview video content.</p>
                         </div>
                     </div>
                 </div>
 
-                <p id="modal-movie-desc" class="modal-desc">Description</p>
-                
                 <div class="modal-actions">
-                    <button id="modal-play-btn" class="modal-btn primary"><i class="fas fa-play"></i> Launch Video</button>
+                    <button id="modal-play-btn" class="modal-btn primary"><i class="fas fa-play"></i> Launch Stream Player</button>
                     <button id="modal-watchlist-btn" class="modal-btn secondary"><i class="fas fa-plus"></i> Add to List</button>
                 </div>
             </div>
@@ -575,7 +624,7 @@
             <div id="player-hud-meta" class="player-hud-meta">★ | Action</div>
 
             <div class="player-controls-container">
-                <div class="custom-dropdown" style="min-width: 220px;">
+                <div class="custom-dropdown" style="min-width: 220px; margin-right: auto;">
                     <span class="custom-dropdown-label">Stream Server</span>
                     <div id="player-server-trigger" class="custom-select-trigger"><span>VidLink Core</span> <i class="fas fa-chevron-down"></i></div>
                     <div id="player-server-options" class="custom-dropdown-options">
@@ -596,6 +645,7 @@
         let watchlist = JSON.parse(localStorage.getItem('cinehub_watchlist')) || [];
         let autoplayEnabled = JSON.parse(localStorage.getItem('cinehub_autoplay')) ?? true;
         let defaultServer = localStorage.getItem('cinehub_server') || 'vidlink';
+        let defaultSearchFilter = localStorage.getItem('cinehub_search_filter') || 'all';
 
         const movieServers = {
             vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=E50914', 
@@ -612,6 +662,7 @@
         let selectedEpisode = 1;
         let selectedServer = defaultServer;
         let hudTimeout = null;
+        let searchDebounceTimer = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('hamburger-btn').addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
@@ -619,6 +670,11 @@
             document.getElementById('close-modal-btn').addEventListener('click', closeModalSystem);
             document.getElementById('player-back-btn').addEventListener('click', closeFullscreenPlayerPage);
             
+            document.getElementById('header-search-btn').addEventListener('click', () => {
+                activateSidebarLink('search');
+                switchView('search');
+            });
+
             document.getElementById('details-modal-overlay').addEventListener('click', (e) => {
                 if(e.target === document.getElementById('details-modal-overlay')) closeModalSystem();
             });
@@ -691,6 +747,12 @@
             });
         }
 
+        function activateSidebarLink(viewName) {
+            document.querySelectorAll('.sidebar-link').forEach(l => {
+                l.classList.toggle('active', l.getAttribute('data-view') === viewName);
+            });
+        }
+
         function switchView(viewName) {
             const container = document.getElementById('content-container');
             container.innerHTML = ''; 
@@ -699,6 +761,9 @@
                 container.innerHTML = `<div id="hero-banner-container"></div><div id="dynamic-categories-container"></div>`;
                 renderDashboardData();
             } 
+            else if (viewName === 'search') {
+                renderSearchView();
+            }
             else if (viewName === 'settings') {
                 renderSettingsView();
             }
@@ -708,11 +773,108 @@
             else if (viewName === 'series') {
                 renderContentGrid("Popular TV Series", 'tv');
             } 
-            else if (viewName === 'not-released') {
-                renderContentGrid("Coming Soon & Not Released", 'movie', true);
-            }
             else if (viewName === 'watchlist') {
                 renderWatchlistView();
+            }
+        }
+
+        /* ==================== CENTERED SEARCH VIEW ==================== */
+        function renderSearchView() {
+            const container = document.getElementById('content-container');
+            let currentFilter = defaultSearchFilter;
+
+            container.innerHTML = `
+                <div class="centered-search-container">
+                    <h2 class="centered-search-title">Explore Movies & Shows</h2>
+                    <p class="centered-search-subtitle">Search across our catalog of entertainment</p>
+                    <div class="search-section-bar">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="global-search-input" class="search-input-box" placeholder="Type a title or actor name..." autofocus>
+                        </div>
+                        <div class="filter-toggle-group">
+                            <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>
+                            <button class="filter-btn ${currentFilter === 'movie' ? 'active' : ''}" data-filter="movie">Movies</button>
+                            <button class="filter-btn ${currentFilter === 'series' ? 'active' : ''}" data-filter="series">TV Shows</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="search-results-grid" class="content-view-grid"></div>
+            `;
+
+            const input = document.getElementById('global-search-input');
+            const grid = document.getElementById('search-results-grid');
+            const filterBtns = container.querySelectorAll('.filter-btn');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.getAttribute('data-filter');
+                    performSearch(input.value.trim(), currentFilter, grid);
+                });
+            });
+
+            input.addEventListener('input', (e) => {
+                clearTimeout(searchDebounceTimer);
+                const query = e.target.value.trim();
+                searchDebounceTimer = setTimeout(() => {
+                    performSearch(query, currentFilter, grid);
+                }, 400);
+            });
+        }
+
+        async function performSearch(query, filterType, targetGrid) {
+            if (!query) {
+                targetGrid.innerHTML = '';
+                return;
+            }
+
+            targetGrid.innerHTML = `<div class="placeholder-message"><i class="fas fa-spinner fa-spin"></i> Searching titles...</div>`;
+
+            try {
+                let endpoint = `${TMDB}/search/multi?api_key=${KEY}&query=${encodeURIComponent(query)}`;
+                if (filterType === 'movie') {
+                    endpoint = `${TMDB}/search/movie?api_key=${KEY}&query=${encodeURIComponent(query)}`;
+                } else if (filterType === 'series') {
+                    endpoint = `${TMDB}/search/tv?api_key=${KEY}&query=${encodeURIComponent(query)}`;
+                }
+
+                const res = await fetch(endpoint);
+                const data = await res.json();
+
+                if (!data.results || data.results.length === 0) {
+                    targetGrid.innerHTML = `<div class="placeholder-message"><i class="fas fa-exclamation-circle"></i> No results found matching "${query}".</div>`;
+                    return;
+                }
+
+                const items = data.results
+                    .filter(item => item.media_type !== 'person' && (item.poster_path || item.backdrop_path))
+                    .map(item => {
+                        let itemType = 'movie';
+                        if (filterType === 'series' || item.media_type === 'tv' || item.first_air_date) {
+                            itemType = 'series';
+                        }
+                        return {
+                            id: item.id,
+                            title: item.title || item.name,
+                            rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
+                            type: itemType,
+                            tag: item.vote_average >= 7.8 ? 'top-pick' : 'none',
+                            imageUrl: item.poster_path ? `${IMGP}${item.poster_path}` : `${IMGB}${item.backdrop_path}`,
+                            backdropUrl: item.backdrop_path ? `${IMGB}${item.backdrop_path}` : `${IMGP}${item.poster_path}`
+                        };
+                    });
+
+                if (items.length === 0) {
+                    targetGrid.innerHTML = `<div class="placeholder-message"><i class="fas fa-exclamation-circle"></i> No media results found for "${query}".</div>`;
+                } else {
+                    targetGrid.innerHTML = '';
+                    generateCards(items, targetGrid, false);
+                }
+            } catch (e) {
+                console.error("Search error", e);
+                targetGrid.innerHTML = `<div class="placeholder-message">Failed to load search results. Please try again.</div>`;
             }
         }
 
@@ -720,7 +882,7 @@
             const container = document.getElementById('content-container');
             container.innerHTML = `
                 <div class="category-container">
-                    <h2 style="text-align: center;">Application Settings</h2>
+                    <h2>Application Settings</h2>
                     <div class="settings-card">
                         <div class="setting-item">
                             <div class="setting-info">
@@ -731,6 +893,18 @@
                                 <input type="checkbox" id="autoplay-toggle" ${autoplayEnabled ? 'checked' : ''}>
                                 <span class="slider"></span>
                             </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h3>Default Search Filter Mode</h3>
+                                <p>Set default search scope preference for quick searches.</p>
+                            </div>
+                            <select id="settings-search-select" class="settings-select">
+                                <option value="all" ${defaultSearchFilter === 'all' ? 'selected' : ''}>All Content</option>
+                                <option value="movie" ${defaultSearchFilter === 'movie' ? 'selected' : ''}>Movies Only</option>
+                                <option value="series" ${defaultSearchFilter === 'series' ? 'selected' : ''}>TV Series Only</option>
+                            </select>
                         </div>
                         
                         <div class="setting-item">
@@ -749,6 +923,11 @@
             document.getElementById('autoplay-toggle').addEventListener('change', (e) => {
                 autoplayEnabled = e.target.checked;
                 localStorage.setItem('cinehub_autoplay', JSON.stringify(autoplayEnabled));
+            });
+
+            document.getElementById('settings-search-select').addEventListener('change', (e) => {
+                defaultSearchFilter = e.target.value;
+                localStorage.setItem('cinehub_search_filter', defaultSearchFilter);
             });
 
             document.getElementById('settings-server-select').addEventListener('change', (e) => {
@@ -795,7 +974,7 @@
                 
                 const epData = await response.json();
                 titleEl.innerText = `S${seasonNum}E${episodeNum}: ${epData.name || 'Untitled Episode'}`;
-                summaryEl.innerText = epData.overview || 'No overview summary generated for this file block.';
+                summaryEl.innerText = epData.overview || 'No overview summary available for this episode.';
                 
                 if (epData.still_path) {
                     imgEl.src = `${IMGP}${epData.still_path}`;
@@ -807,7 +986,7 @@
                 selectedEpisode = episodeNum;
             } catch (err) {
                 titleEl.innerText = `Season ${seasonNum} Episode ${episodeNum}`;
-                summaryEl.innerText = "Custom entered parameters synced. Ready to map video iframe stream nodes.";
+                summaryEl.innerText = "Target parameters synced. Ready to load video stream.";
                 imgEl.src = activeItemContext.backdropUrl || activeItemContext.imageUrl;
                 selectedSeason = seasonNum;
                 selectedEpisode = episodeNum;
@@ -866,7 +1045,7 @@
             try {
                 const res = await fetch(`${TMDB}/${item.type === 'series' ? 'tv' : 'movie'}/${item.id}?api_key=${KEY}`);
                 const detail = await res.json();
-                document.getElementById('modal-movie-desc').innerText = detail.overview || "No text data layout index discovered.";
+                document.getElementById('modal-movie-desc').innerText = detail.overview || "No overview available for this title.";
                 if (detail.backdrop_path) activeItemContext.backdropUrl = `${IMGB}${detail.backdrop_path}`;
                 
                 if (item.type === 'series') {
@@ -936,11 +1115,15 @@
             document.getElementById('details-modal-overlay').classList.remove('active');
         }
 
+        /* ==================== REMIXED HOMEPAGE RENDERING ==================== */
         async function renderDashboardData() {
             const container = document.getElementById('dynamic-categories-container');
             try {
                 const trendingRes = await fetch(`${TMDB}/trending/all/day?api_key=${KEY}`);
                 const trendingData = await trendingRes.json();
+
+                const popularRes = await fetch(`${TMDB}/movie/popular?api_key=${KEY}`);
+                const popularData = await popularRes.json();
                 
                 if(trendingData.results && trendingData.results.length > 0) {
                     const hero = trendingData.results[0];
@@ -955,7 +1138,7 @@
                         backdropUrl: `${IMGB}${hero.backdrop_path}`
                     });
 
-                    const mappedTrending = trendingData.results.slice(11, 111).map(item => ({
+                    const mappedTrending = trendingData.results.slice(1, 12).map(item => ({
                         id: item.id,
                         title: item.title || item.name,
                         rating: `★ ${item.vote_average.toFixed(1)}`,
@@ -965,23 +1148,19 @@
                         backdropUrl: `${IMGB}${item.backdrop_path}`
                     }));
                     
-                    createCategorySection("Trending Tracks", mappedTrending, container, false);
-                    createCategorySection("Featured Spotlights", mappedTrending, container, true);
-                }
-
-                const upcomingRes = await fetch(`${TMDB}/movie/upcoming?api_key=${KEY}&page=1`);
-                const upcomingData = await upcomingRes.json();
-                if(upcomingData.results && upcomingData.results.length > 0) {
-                    const mappedUpcoming = upcomingData.results.slice(0, 10).map(item => ({
+                    const mappedPopular = popularData.results.slice(0, 10).map(item => ({
                         id: item.id,
-                        title: item.title,
-                        rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
+                        title: item.title || item.name,
+                        rating: `★ ${item.vote_average.toFixed(1)}`,
                         type: 'movie',
-                        tag: 'none', 
+                        tag: item.vote_average >= 7.5 ? 'fan-favorite' : 'none',
                         imageUrl: `${IMGP}${item.poster_path}`,
                         backdropUrl: `${IMGB}${item.backdrop_path}`
                     }));
-                    createCategorySection("Anticipated Future Releases", mappedUpcoming, container, false);
+
+                    createCategorySection("Trending Hits", mappedTrending, container, false);
+                    createCategorySection("Popular Spotlight", mappedPopular, container, true);
+                    createCategorySection("Featured Highlights", mappedTrending.slice().reverse(), container, false);
                 }
             } catch (err) { console.error(err); }
         }
@@ -990,7 +1169,7 @@
             const container = document.getElementById('hero-banner-container');
             container.innerHTML = `
                 <div class="hero-banner" style="background-image: url('${item.backdropUrl}')">
-                    <div class="hero-overlay"></div>
+                    <div class="hero-overlay"></div><div class="hero-left-vignette"></div>
                     <div class="hero-content">
                         <h1 class="hero-title">${item.title}</h1>
                         <div class="hero-meta"><span>${item.rating}</span><span class="year">${item.year}</span></div>
@@ -1015,30 +1194,57 @@
             containerElement.appendChild(section);
         }
 
-        async function renderContentGrid(title, type, forceUpcomingOnly = false) {
+        async function renderContentGrid(title, type) {
             const container = document.getElementById('content-container');
-            container.innerHTML = `<div class="category-container"><h2>${title}</h2><div class="content-view-grid"></div></div>`;
-            const grid = container.querySelector('.content-view-grid');
+            container.innerHTML = `
+                <div class="category-container">
+                    <h2>${title}</h2>
+                    <div class="search-section-bar" style="margin-bottom: 2rem;">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="view-search-input" class="search-input-box" placeholder="Filter ${type === 'movie' ? 'movies' : 'TV shows'} by title...">
+                        </div>
+                    </div>
+                    <div class="content-view-grid" id="view-items-grid">
+                        <div class="placeholder-message"><i class="fas fa-spinner fa-spin"></i> Loading titles...</div>
+                    </div>
+                </div>
+            `;
+            
+            const grid = container.querySelector('#view-items-grid');
+            const searchInput = container.querySelector('#view-search-input');
+
             try {
-                const endpoint = forceUpcomingOnly ? `${TMDB}/movie/upcoming` : `${TMDB}/${type}/popular`;
+                const endpoint = `${TMDB}/${type}/popular`;
                 const response = await fetch(`${endpoint}?api_key=${KEY}`);
                 const data = await response.json();
-                const items = data.results.map(item => {
-                    let dynamicTag = item.vote_average >= 7.8 ? 'top-pick' : 'none';
-                    if (forceUpcomingOnly) {
-                        dynamicTag = 'none';
+                
+                let allItems = data.results.map(item => ({
+                    id: item.id,
+                    title: item.title || item.name,
+                    rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
+                    type: type === 'movie' ? 'movie' : 'series',
+                    tag: item.vote_average >= 7.8 ? 'top-pick' : 'none',
+                    imageUrl: `${IMGP}${item.poster_path}`,
+                    backdropUrl: `${IMGB}${item.backdrop_path}`
+                }));
+
+                const renderFiltered = (filterText) => {
+                    grid.innerHTML = '';
+                    const filtered = allItems.filter(i => i.title.toLowerCase().includes(filterText.toLowerCase()));
+                    if (filtered.length === 0) {
+                        grid.innerHTML = `<div class="placeholder-message">No matching titles found.</div>`;
+                    } else {
+                        generateCards(filtered, grid, false);
                     }
-                    return {
-                        id: item.id,
-                        title: item.title || item.name,
-                        rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
-                        type: type === 'movie' ? 'movie' : 'series',
-                        tag: dynamicTag,
-                        imageUrl: `${IMGP}${item.poster_path}`,
-                        backdropUrl: `${IMGB}${item.backdrop_path}`
-                    };
+                };
+
+                renderFiltered('');
+
+                searchInput.addEventListener('input', (e) => {
+                    renderFiltered(e.target.value.trim());
                 });
-                generateCards(items, grid, false);
+
             } catch (e) { console.error(e); }
         }
 
