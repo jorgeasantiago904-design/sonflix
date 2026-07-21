@@ -686,7 +686,6 @@
                     <div id="player-server-trigger" class="custom-select-trigger"><span>VidLink Core</span> <i class="fas fa-chevron-down"></i></div>
                     <div id="player-server-options" class="custom-dropdown-options">
                         <div class="custom-option" data-value="vidlink">VidLink Engine Core</div>
-                        <div class="custom-option" data-value="SuperEmbed">SuperEmbed Engine Core</div>
                         <div class="custom-option" data-value="vidking">VidKing Engine Core</div>
                     </div>
                 </div>
@@ -708,14 +707,12 @@
 
         const movieServers = {
             vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=E50914', 
-            vidking: 'https://www.vidking.net/embed/movie/{tmdb}',
-            SuperEmbed: 'https://multiembed.mov/?video_id={tmdb}&tmdb=1'
+            vidking: 'https://www.vidking.net/embed/movie/{tmdb}'
         };
 
         const tvServers = {
             vidlink: 'https://vidlink.pro/tv/{tmdb}/{s}/{e}?primaryColor=E50914',
-            vidking: 'https://www.vidking.net/embed/tv/{tmdb}/{s}/{e}',
-            SuperEmbed: 'https://multiembed.mov/?video_id={tmdb}&tmdb=1&s={s}&e={e}'
+            vidking: 'https://www.vidking.net/embed/tv/{tmdb}/{s}/{e}'
         };
 
         let activeItemContext = null;
@@ -995,7 +992,6 @@
                             </div>
                             <select id="settings-server-select" class="settings-select">
                                 <option value="vidlink" ${defaultServer === 'vidlink' ? 'selected' : ''}>VidLink Core</option>
-                                <option value="SuperEmbed" ${defaultServer === 'SuperEmbed' ? 'selected' : ''}>SuperEmbed is has ad that are corn /p Core</option>
                                 <option value="vidking" ${defaultServer === 'vidking' ? 'selected' : ''}>VidKing Core</option>
                             </select>
                         </div>
