@@ -154,11 +154,11 @@
 
         /* ==================== SETTINGS CONTROLS ==================== */
         .settings-card { background: var(--primary-card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; max-width: 600px; margin: 2rem 0; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; }
         .setting-item:last-child { border-bottom: none; }
         .setting-info h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; }
         .setting-info p { margin: 0; font-size: 0.9rem; color: var(--text-secondary); }
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #30363d; transition: .3s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
@@ -168,9 +168,66 @@
         .settings-select {
             background: #0D1117; border: 1px solid var(--border-color); color: white;
             padding: 0.65rem 1rem; border-radius: 6px; font-weight: 600; font-family: inherit; font-size: 0.95rem;
-            min-width: 150px; cursor: pointer;
+            min-width: 150px; cursor: pointer; flex-shrink: 0;
         }
         .settings-select:focus { border-color: var(--accent-color); outline: none; }
+
+        /* CUSTOM NUMBER CONTROL FOR SETTINGS */
+        .custom-number-control {
+            display: flex;
+            align-items: center;
+            background: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: border-color 0.2s ease;
+        }
+        .custom-number-control:focus-within {
+            border-color: var(--accent-color);
+        }
+        .custom-number-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-primary);
+            width: 36px;
+            height: 38px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .custom-number-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        .custom-number-btn:active {
+            transform: scale(0.92);
+        }
+        .custom-number-input {
+            width: 50px;
+            height: 38px;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: center;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 1rem;
+            -moz-appearance: textfield;
+        }
+        .custom-number-input::-webkit-outer-spin-button,
+        .custom-number-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .custom-number-input:focus {
+            outline: none;
+        }
 
         /* ==================== TV CUSTOM INPUT COMPONENT ==================== */
         .tv-custom-input-box {
@@ -646,6 +703,7 @@
         let autoplayEnabled = JSON.parse(localStorage.getItem('cinehub_autoplay')) ?? true;
         let defaultServer = localStorage.getItem('cinehub_server') || 'vidlink';
         let defaultSearchFilter = localStorage.getItem('cinehub_search_filter') || 'all';
+        let itemLimit = JSON.parse(localStorage.getItem('cinehub_item_limit')) || 25;
 
         const movieServers = {
             vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=E50914', 
@@ -833,8 +891,9 @@
 
             try {
                 let allResults = [];
+                let totalPagesToFetch = Math.max(1, Math.ceil(itemLimit / 20));
                 
-                for(let page = 1; page <= 4; page++) {
+                for(let page = 1; page <= totalPagesToFetch; page++) {
                     let endpoint = `${TMDB}/search/multi?api_key=${KEY}&query=${encodeURIComponent(query)}&page=${page}`;
                     if (filterType === 'movie') {
                         endpoint = `${TMDB}/search/movie?api_key=${KEY}&query=${encodeURIComponent(query)}&page=${page}`;
@@ -871,7 +930,7 @@
                             backdropUrl: item.backdrop_path ? `${IMGB}${item.backdrop_path}` : `${IMGP}${item.poster_path}`
                         };
                     })
-                    .slice(0, 100);
+                    .slice(0, itemLimit);
 
                 if (items.length === 0) {
                     targetGrid.innerHTML = `<div class="placeholder-message"><i class="fas fa-exclamation-circle"></i> No media results found for "${query}".</div>`;
@@ -891,6 +950,18 @@
                 <div class="category-container">
                     <h2>Application Settings</h2>
                     <div class="settings-card">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h3>Content Display Limit</h3>
+                                <p>Set how many titles load per category across grids & search (1 - 100).</p>
+                            </div>
+                            <div class="custom-number-control">
+                                <button type="button" class="custom-number-btn" id="limit-dec-btn">-</button>
+                                <input type="number" id="settings-limit-input" class="custom-number-input" value="${itemLimit}" min="1" max="100">
+                                <button type="button" class="custom-number-btn" id="limit-inc-btn">+</button>
+                            </div>
+                        </div>
+
                         <div class="setting-item">
                             <div class="setting-info">
                                 <h3>Continuous Play (Autoplay)</h3>
@@ -927,6 +998,25 @@
                     </div>
                 </div>
             `;
+
+            // Custom Limit Control Logic
+            const limitInput = document.getElementById('settings-limit-input');
+            const decBtn = document.getElementById('limit-dec-btn');
+            const incBtn = document.getElementById('limit-inc-btn');
+
+            const updateLimit = (val) => {
+                let num = parseInt(val) || 10;
+                if (num < 1) num = 1;
+                if (num > 100) num = 100;
+                itemLimit = num;
+                limitInput.value = itemLimit;
+                localStorage.setItem('cinehub_item_limit', JSON.stringify(itemLimit));
+            };
+
+            decBtn.addEventListener('click', () => updateLimit(itemLimit - 5));
+            incBtn.addEventListener('click', () => updateLimit(itemLimit + 5));
+            limitInput.addEventListener('change', (e) => updateLimit(e.target.value));
+
             document.getElementById('autoplay-toggle').addEventListener('change', (e) => {
                 autoplayEnabled = e.target.checked;
                 localStorage.setItem('cinehub_autoplay', JSON.stringify(autoplayEnabled));
@@ -1041,7 +1131,7 @@
                         grid.className = 'movie-grid-horizontal';
                         catDiv.appendChild(grid);
                         
-                        let items = cat.items.slice(0, 25).map(item => ({
+                        let items = cat.items.slice(0, itemLimit).map(item => ({
                             id: item.id,
                             title: item.title || item.name,
                             rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
@@ -1071,21 +1161,22 @@
 
             const grid = document.getElementById('main-grid');
             let allItems = [];
+            let totalPagesToFetch = Math.max(1, Math.ceil(itemLimit / 20));
 
             try {
                 if(type === 'movie') {
-                    for(let page = 1; page <= 5; page++) {
+                    for(let page = 1; page <= totalPagesToFetch; page++) {
                         let data = await fetch(`${TMDB}/movie/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
                         if(data.results) allItems.push(...data.results);
                     }
                 } else if(type === 'tv') {
-                    for(let page = 1; page <= 5; page++) {
+                    for(let page = 1; page <= totalPagesToFetch; page++) {
                         let data = await fetch(`${TMDB}/tv/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
                         if(data.results) allItems.push(...data.results);
                     }
                 }
 
-                let items = allItems.slice(0, 100).map(item => ({
+                let items = allItems.slice(0, itemLimit).map(item => ({
                     id: item.id,
                     title: item.title || item.name,
                     rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
@@ -1128,7 +1219,7 @@
         function generateCards(items, targetGrid, isHorizontal = false) {
             items.forEach(item => {
                 const card = document.createElement('div');
-                card.className = `movie-card ${isHorizontal ? '' : 'rect-card'}`;
+                card.className = 'movie-card'; 
                 card.innerHTML = `
                     <div class="card-image-container">
                         <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
