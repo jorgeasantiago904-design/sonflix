@@ -686,6 +686,7 @@
                     <div id="player-server-trigger" class="custom-select-trigger"><span>VidLink Core</span> <i class="fas fa-chevron-down"></i></div>
                     <div id="player-server-options" class="custom-dropdown-options">
                         <div class="custom-option" data-value="vidlink">VidLink Engine Core</div>
+                        <div class="custom-option" data-value="SuperEmbed">SuperEmbed Engine Core</div>
                         <div class="custom-option" data-value="vidking">VidKing Engine Core</div>
                     </div>
                 </div>
@@ -707,12 +708,14 @@
 
         const movieServers = {
             vidlink: 'https://vidlink.pro/movie/{tmdb}?primaryColor=E50914', 
-            vidking: 'https://www.vidking.net/embed/movie/{tmdb}'
+            vidking: 'https://www.vidking.net/embed/movie/{tmdb}',
+            SuperEmbed: 'https://multiembed.mov/?video_id={tmdb}&tmdb=1'
         };
 
         const tvServers = {
             vidlink: 'https://vidlink.pro/tv/{tmdb}/{s}/{e}?primaryColor=E50914',
-            vidking: 'https://www.vidking.net/embed/tv/{tmdb}/{s}/{e}'
+            vidking: 'https://www.vidking.net/embed/tv/{tmdb}/{s}/{e}',
+            SuperEmbed: 'https://multiembed.mov/?video_id={tmdb}&tmdb=1&s={s}&e={e}'
         };
 
         let activeItemContext = null;
