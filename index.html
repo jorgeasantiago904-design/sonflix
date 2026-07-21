@@ -455,7 +455,7 @@
         .modal-body { padding: 1.5rem 2.2rem; overflow-y: auto; flex-grow: 1; }
         .modal-title-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem; gap: 1rem; }
         .modal-title { font-size: 2.2rem; font-weight: 800; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2; }
-        .modal-meta { display: flex; gap: 0.75rem; font-size: 0.85rem; font-weight: 700; color: #4ade80; background: rgba(74, 222, 128, 0.1); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2); flex-shrink: 0; }
+        .modal-meta { display: flex; gap: 0.75rem; font-size: 0.85rem; font-weight: 700; color: #4ade80; background: rgba(74, 222, 128, 0.1); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.3); }
         .modal-desc { color: var(--text-primary); line-height: 1.6; margin-bottom: 1.5rem; font-size: 0.95rem; }
 
         .custom-dropdown { position: relative; flex: 1; }
@@ -768,7 +768,7 @@
                 renderSettingsView();
             }
             else if (viewName === 'movies' || viewName === 'trending') {
-                renderContentGrid("Popular Movies", 'movie');
+                renderContentGrid("Popular Movies & Shows", 'mixed');
             } 
             else if (viewName === 'series') {
                 renderContentGrid("Popular TV Series", 'tv');
@@ -998,200 +998,63 @@
             container.innerHTML = `<div class="category-container"><h2>My List</h2><div class="content-view-grid"></div></div>`;
             const grid = container.querySelector('.content-view-grid');
             if (watchlist.length === 0) {
-                grid.innerHTML = `<div class="placeholder-message"><i class="fas fa-plus-circle"></i> Watchlist is empty.</div>`;
+                grid.innerHTML = `<div class="placeholder-message" style="grid-column: 1 / -1;"><i class="fas fa-bookmark"></i> Your watchlist is empty. Start adding movies and shows!</div>`;
             } else {
-                generateCards(watchlist, grid);
+                generateCards(watchlist, grid, false);
             }
         }
 
-        function toggleWatchlist(item, buttonElement) {
-            const index = watchlist.findIndex(w => w.id === item.id);
-            if (index !== -1) {
-                watchlist.splice(index, 1);
-                updateWatchlistBtnState(buttonElement, false);
-            } else {
-                watchlist.push(item);
-                updateWatchlistBtnState(buttonElement, true);
-            }
-            localStorage.setItem('cinehub_watchlist', JSON.stringify(watchlist));
-        }
-
-        function updateWatchlistBtnState(btn, isAdded) {
-            if(!btn) return;
-            btn.className = isAdded ? 'modal-btn secondary added' : 'modal-btn secondary';
-            btn.innerHTML = isAdded ? `<i class="fas fa-check"></i> In Watchlist` : `<i class="fas fa-plus"></i> Add to List`;
-        }
-
-        async function openDetailsModal(item) {
-            activeItemContext = item;
-            const overlay = document.getElementById('details-modal-overlay');
-            document.getElementById('modal-movie-title').innerText = item.title;
-            document.getElementById('modal-movie-meta').innerText = `${item.rating} | ${item.type === 'series' ? 'TV SHOW' : 'MOVIE'}`;
-            document.getElementById('modal-hero-banner').style.backgroundImage = `url('${item.backdropUrl || item.imageUrl}')`;
-            
-            updateWatchlistBtnState(document.getElementById('modal-watchlist-btn'), watchlist.some(w => w.id === item.id));
-            
-            const tvInputs = document.getElementById('modal-tv-inputs-container');
-            if (item.type === 'series') {
-                tvInputs.style.display = 'flex';
-                document.getElementById('custom-season-select').innerHTML = '<option value="1">1</option>';
-                document.getElementById('custom-episode-select').innerHTML = '<option value="1">1</option>';
-            } else {
-                tvInputs.style.display = 'none';
-            }
-
-            overlay.classList.add('active');
-
-            try {
-                const res = await fetch(`${TMDB}/${item.type === 'series' ? 'tv' : 'movie'}/${item.id}?api_key=${KEY}`);
-                const detail = await res.json();
-                document.getElementById('modal-movie-desc').innerText = detail.overview || "No overview available for this title.";
-                if (detail.backdrop_path) activeItemContext.backdropUrl = `${IMGB}${detail.backdrop_path}`;
-                
-                if (item.type === 'series') {
-                    const seasonSelect = document.getElementById('custom-season-select');
-                    seasonSelect.innerHTML = '';
-                    const sCount = detail.number_of_seasons || 1;
-                    for(let i = 1; i <= sCount; i++) {
-                        seasonSelect.innerHTML += `<option value="${i}">${i}</option>`;
-                    }
-                    await populateEpisodes(item.id, 1);
-                    syncLiveEpisodeMetadata();
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        function bypassDirectToStream() {
-            if(!activeItemContext) return;
-            closeModalSystem();
-
-            const playerPage = document.getElementById('fullscreen-player-page');
-            document.getElementById('video-iframe-container').style.display = 'none';
-            playerPage.style.backgroundImage = `url('${activeItemContext.backdropUrl || activeItemContext.imageUrl}')`;
-            
-            let hudMetaText = `${activeItemContext.rating} | ${activeItemContext.type === 'series' ? 'TV SHOW' : 'MOVIE'}`;
-            if(activeItemContext.type === 'series') {
-                hudMetaText += ` | Season ${selectedSeason} Episode ${selectedEpisode}`;
-            }
-            
-            document.getElementById('player-hud-title').innerText = activeItemContext.title;
-            document.getElementById('player-hud-meta').innerText = hudMetaText;
-
-            playerPage.classList.add('active');
-            triggerBackBtnVisibilityTracker();
-            executeFullscreenVideo();
-        }
-
-        function executeFullscreenVideo() {
-            if(!activeItemContext) return;
-            const container = document.getElementById('video-iframe-container');
-            container.innerHTML = '';
-            container.style.display = 'block';
-
-            let streamUrl = activeItemContext.type === 'movie' 
-                ? movieServers[selectedServer].replace('{tmdb}', activeItemContext.id)
-                : tvServers[selectedServer].replace('{tmdb}', activeItemContext.id).replace('{s}', selectedSeason).replace('{e}', selectedEpisode);
-
-            let hudMetaText = `${activeItemContext.rating} | ${activeItemContext.type === 'series' ? 'TV SHOW' : 'MOVIE'}`;
-            if(activeItemContext.type === 'series') {
-                hudMetaText += ` | Season ${selectedSeason} Episode ${selectedEpisode}`;
-            }
-            document.getElementById('player-hud-meta').innerText = hudMetaText;
-
-            const iframe = document.createElement('iframe');
-            iframe.src = streamUrl;
-            iframe.allowFullscreen = true;
-            iframe.setAttribute('allow', 'autoplay; encrypted-media');
-            container.appendChild(iframe);
-        }
-
-        function closeFullscreenPlayerPage() {
-            document.getElementById('fullscreen-player-page').classList.remove('active');
-            document.getElementById('video-iframe-container').innerHTML = '';
-            clearTimeout(hudTimeout);
-        }
-
-        function closeModalSystem() {
-            document.getElementById('details-modal-overlay').classList.remove('active');
-        }
-
-        /* ==================== REMIXED HOMEPAGE RENDERING ==================== */
         async function renderDashboardData() {
-            const container = document.getElementById('dynamic-categories-container');
             try {
-                const trendingRes = await fetch(`${TMDB}/trending/all/day?api_key=${KEY}`);
-                const trendingData = await trendingRes.json();
-
-                const popularRes = await fetch(`${TMDB}/movie/popular?api_key=${KEY}`);
-                const popularData = await popularRes.json();
+                const categoriesContainer = document.getElementById('dynamic-categories-container');
                 
-                if(trendingData.results && trendingData.results.length > 0) {
-                    const hero = trendingData.results[0];
-                    renderHeroBanner({
-                        id: hero.id,
-                        title: hero.title || hero.name,
-                        rating: `★ ${hero.vote_average.toFixed(1)}`,
-                        year: new Date(hero.release_date || hero.first_air_date).getFullYear() || '2026',
-                        description: hero.overview,
-                        type: hero.media_type === 'tv' ? 'series' : 'movie',
-                        imageUrl: `${IMGP}${hero.poster_path}`,
-                        backdropUrl: `${IMGB}${hero.backdrop_path}`
-                    });
+                let movieData = await fetch(`${TMDB}/movie/popular?api_key=${KEY}&page=1`).then(r => r.json());
+                let tvData = await fetch(`${TMDB}/tv/popular?api_key=${KEY}&page=1`).then(r => r.json());
+                let trendingData = await fetch(`${TMDB}/trending/all/week?api_key=${KEY}`).then(r => r.json());
 
-                    const mappedTrending = trendingData.results.slice(1, 12).map(item => ({
-                        id: item.id,
-                        title: item.title || item.name,
-                        rating: `★ ${item.vote_average.toFixed(1)}`,
-                        type: item.media_type === 'tv' ? 'series' : 'movie',
-                        tag: item.vote_average >= 7.8 ? 'top-pick' : 'none', 
-                        imageUrl: `${IMGP}${item.poster_path}`,
-                        backdropUrl: `${IMGB}${item.backdrop_path}`
-                    }));
-                    
-                    const mappedPopular = popularData.results.slice(0, 10).map(item => ({
-                        id: item.id,
-                        title: item.title || item.name,
-                        rating: `★ ${item.vote_average.toFixed(1)}`,
-                        type: 'movie',
-                        tag: item.vote_average >= 7.5 ? 'fan-favorite' : 'none',
-                        imageUrl: `${IMGP}${item.poster_path}`,
-                        backdropUrl: `${IMGB}${item.backdrop_path}`
-                    }));
-
-                    createCategorySection("Trending Hits", mappedTrending, container, false);
-                    createCategorySection("Popular Spotlight", mappedPopular, container, true);
-                    createCategorySection("Featured Highlights", mappedTrending.slice().reverse(), container, false);
+                let heroItem = null;
+                if(movieData.results && movieData.results.length > 0) {
+                    heroItem = movieData.results[0];
                 }
-            } catch (err) { console.error(err); }
-        }
 
-        function renderHeroBanner(item) {
-            const container = document.getElementById('hero-banner-container');
-            container.innerHTML = `
-                <div class="hero-banner" style="background-image: url('${item.backdropUrl}')">
-                    <div class="hero-overlay"></div><div class="hero-left-vignette"></div>
-                    <div class="hero-content">
-                        <h1 class="hero-title">${item.title}</h1>
-                        <div class="hero-meta"><span>${item.rating}</span><span class="year">${item.year}</span></div>
-                        <p class="hero-description">${item.description}</p>
-                        <div class="hero-buttons"><button class="hero-btn play" id="hero-launch-btn"><i class="fas fa-play"></i> View Details</button></div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('hero-launch-btn').addEventListener('click', () => openDetailsModal(item));
-        }
+                renderHeroBanner(heroItem);
 
-        function createCategorySection(title, items, containerElement, isRectangular = false) {
-            const section = document.createElement('div');
-            section.className = 'category-container';
-            section.innerHTML = `<h2>${title}</h2>`;
-            
-            const grid = document.createElement('div');
-            grid.className = isRectangular ? 'movie-grid-horizontal rect-layout' : 'movie-grid-horizontal';
-            
-            generateCards(items, grid, isRectangular);
-            section.appendChild(grid);
-            containerElement.appendChild(section);
+                let allItems = [];
+                if(movieData.results) allItems.push(...movieData.results.map(m => ({ ...m, media_type: 'movie' })));
+                if(tvData.results) allItems.push(...tvData.results.map(t => ({ ...t, media_type: 'tv' })));
+
+                let categories = [
+                    { title: 'Trending This Week', items: trendingData.results || [] },
+                    { title: 'Popular Movies', items: movieData.results || [] },
+                    { title: 'Popular TV Shows', items: tvData.results || [] }
+                ];
+
+                for(let cat of categories) {
+                    if(cat.items.length > 0) {
+                        const catDiv = document.createElement('div');
+                        catDiv.className = 'category-container';
+                        catDiv.innerHTML = `<h2>${cat.title}</h2>`;
+                        const grid = document.createElement('div');
+                        grid.className = 'movie-grid-horizontal';
+                        catDiv.appendChild(grid);
+                        
+                        let items = cat.items.slice(0, 25).map(item => ({
+                            id: item.id,
+                            title: item.title || item.name,
+                            rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
+                            type: item.media_type === 'tv' ? 'series' : 'movie',
+                            tag: item.vote_average >= 7.8 ? 'top-pick' : 'none',
+                            imageUrl: item.poster_path ? `${IMGP}${item.poster_path}` : `${IMGB}${item.backdrop_path}`,
+                            backdropUrl: item.backdrop_path ? `${IMGB}${item.backdrop_path}` : `${IMGP}${item.poster_path}`
+                        }));
+
+                        generateCards(items, grid, true);
+                        categoriesContainer.appendChild(catDiv);
+                    }
+                }
+            } catch(e) {
+                console.error("Dashboard error", e);
+            }
         }
 
         async function renderContentGrid(title, type) {
@@ -1199,78 +1062,185 @@
             container.innerHTML = `
                 <div class="category-container">
                     <h2>${title}</h2>
-                    <div class="search-section-bar" style="margin-bottom: 2rem;">
-                        <div class="search-input-wrapper">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="view-search-input" class="search-input-box" placeholder="Filter ${type === 'movie' ? 'movies' : 'TV shows'} by title...">
-                        </div>
-                    </div>
-                    <div class="content-view-grid" id="view-items-grid">
-                        <div class="placeholder-message"><i class="fas fa-spinner fa-spin"></i> Loading titles...</div>
-                    </div>
+                    <div class="content-view-grid" id="main-grid"></div>
                 </div>
             `;
-            
-            const grid = container.querySelector('#view-items-grid');
-            const searchInput = container.querySelector('#view-search-input');
+
+            const grid = document.getElementById('main-grid');
+            let allItems = [];
 
             try {
-                const endpoint = `${TMDB}/${type}/popular`;
-                const response = await fetch(`${endpoint}?api_key=${KEY}`);
-                const data = await response.json();
-                
-                let allItems = data.results.map(item => ({
+                if(type === 'movie') {
+                    for(let page = 1; page <= 5; page++) {
+                        let data = await fetch(`${TMDB}/movie/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
+                        if(data.results) allItems.push(...data.results);
+                    }
+                } else if(type === 'tv') {
+                    for(let page = 1; page <= 5; page++) {
+                        let data = await fetch(`${TMDB}/tv/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
+                        if(data.results) allItems.push(...data.results);
+                    }
+                } else if(type === 'mixed') {
+                    for(let page = 1; page <= 3; page++) {
+                        let movieData = await fetch(`${TMDB}/movie/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
+                        let tvData = await fetch(`${TMDB}/tv/popular?api_key=${KEY}&page=${page}`).then(r => r.json());
+                        if(movieData.results) allItems.push(...movieData.results.map(m => ({ ...m, media_type: 'movie' })));
+                        if(tvData.results) allItems.push(...tvData.results.map(t => ({ ...t, media_type: 'tv' })));
+                    }
+                }
+
+                let items = allItems.slice(0, 100).map(item => ({
                     id: item.id,
                     title: item.title || item.name,
                     rating: item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR',
-                    type: type === 'movie' ? 'movie' : 'series',
+                    type: item.media_type === 'tv' || item.first_air_date ? 'series' : 'movie',
                     tag: item.vote_average >= 7.8 ? 'top-pick' : 'none',
-                    imageUrl: `${IMGP}${item.poster_path}`,
-                    backdropUrl: `${IMGB}${item.backdrop_path}`
+                    imageUrl: item.poster_path ? `${IMGP}${item.poster_path}` : `${IMGB}${item.backdrop_path}`,
+                    backdropUrl: item.backdrop_path ? `${IMGB}${item.backdrop_path}` : `${IMGP}${item.poster_path}`
                 }));
 
-                const renderFiltered = (filterText) => {
-                    grid.innerHTML = '';
-                    const filtered = allItems.filter(i => i.title.toLowerCase().includes(filterText.toLowerCase()));
-                    if (filtered.length === 0) {
-                        grid.innerHTML = `<div class="placeholder-message">No matching titles found.</div>`;
-                    } else {
-                        generateCards(filtered, grid, false);
-                    }
-                };
-
-                renderFiltered('');
-
-                searchInput.addEventListener('input', (e) => {
-                    renderFiltered(e.target.value.trim());
-                });
-
-            } catch (e) { console.error(e); }
+                generateCards(items, grid, false);
+            } catch(e) {
+                console.error("Grid error", e);
+                grid.innerHTML = `<div class="placeholder-message">Failed to load content. Please try again.</div>`;
+            }
         }
 
-        function generateCards(items, container, isRectangular = false) {
+        function renderHeroBanner(item) {
+            if(!item) return;
+            const heroBanner = document.getElementById('hero-banner-container');
+            const backdropUrl = item.backdrop_path ? `${IMGB}${item.backdrop_path}` : '';
+            heroBanner.innerHTML = `
+                <div class="hero-banner" style="background-image: url('${backdropUrl}');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-left-vignette"></div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">${item.title || item.name}</h1>
+                        <div class="hero-meta">
+                            <span class="year">${new Date(item.release_date || item.first_air_date).getFullYear()}</span>
+                            <span>${item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)}` : 'NR'}</span>
+                        </div>
+                        <p class="hero-description">${item.overview || 'No description available.'}</p>
+                        <div class="hero-buttons">
+                            <button class="hero-btn play"><i class="fas fa-play"></i> Play Now</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateCards(items, targetGrid, isHorizontal = false) {
             items.forEach(item => {
                 const card = document.createElement('div');
-                card.className = isRectangular ? 'movie-card rect-card' : 'movie-card';
-                
-                let tagMarkup = '';
-                if (item.tag && item.tag !== 'none') {
-                    tagMarkup = `<div class="card-tag-ribbon ${item.tag}">${item.tag.replace('-', ' ')}</div>`;
-                }
-                
-                let imgSrc = (isRectangular && item.backdropUrl) ? item.backdropUrl : item.imageUrl;
-
+                card.className = `movie-card ${isHorizontal ? '' : 'rect-card'}`;
                 card.innerHTML = `
-                    ${tagMarkup}
-                    <div class="card-image-container"><img src="${imgSrc}" loading="lazy" alt="${item.title}"></div>
+                    <div class="card-image-container">
+                        <img src="${item.imageUrl}" alt="${item.title}" loading="lazy">
+                    </div>
                     <div class="card-content">
                         <h3 class="card-title">${item.title}</h3>
-                        <div class="card-info"><span class="card-rating">${item.rating}</span><span>${item.type === 'series' ? 'TV Show' : 'Movie'}</span></div>
+                        <div class="card-info">
+                            <span class="card-rating">${item.rating}</span>
+                            <span>${item.type === 'series' ? 'TV' : 'Movie'}</span>
+                        </div>
                     </div>
+                    ${item.tag && item.tag !== 'none' ? `<div class="card-tag-ribbon ${item.tag}">TOP PICK</div>` : ''}
                 `;
                 card.addEventListener('click', () => openDetailsModal(item));
-                container.appendChild(card);
+                targetGrid.appendChild(card);
             });
+        }
+
+        function openDetailsModal(item) {
+            activeItemContext = item;
+            const modal = document.getElementById('details-modal-overlay');
+            const modalTitle = document.getElementById('modal-movie-title');
+            const modalMeta = document.getElementById('modal-movie-meta');
+            const modalDesc = document.getElementById('modal-movie-desc');
+            const modalHero = document.getElementById('modal-hero-banner');
+            const tvInputs = document.getElementById('modal-tv-inputs-container');
+
+            modalTitle.innerText = item.title;
+            modalMeta.innerText = `★ ${item.rating.replace('★ ', '')} | ${item.type === 'series' ? 'TV Series' : 'Movie'}`;
+            modalDesc.innerText = 'Loading description...';
+            modalHero.style.backgroundImage = `url('${item.backdropUrl}')`;
+
+            if(item.type === 'series') {
+                tvInputs.style.display = 'block';
+                fetchTVSeasons(item.id);
+            } else {
+                tvInputs.style.display = 'none';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModalSystem() {
+            document.getElementById('details-modal-overlay').classList.remove('active');
+            activeItemContext = null;
+        }
+
+        async function fetchTVSeasons(tvId) {
+            try {
+                const res = await fetch(`${TMDB}/tv/${tvId}?api_key=${KEY}`);
+                const data = await res.json();
+                const seasonSelect = document.getElementById('custom-season-select');
+                seasonSelect.innerHTML = '';
+                for(let i = 1; i <= (data.number_of_seasons || 1); i++) {
+                    seasonSelect.innerHTML += `<option value="${i}">Season ${i}</option>`;
+                }
+                await populateEpisodes(tvId, 1);
+                syncLiveEpisodeMetadata();
+            } catch(e) {
+                console.error("Failed to fetch seasons", e);
+            }
+        }
+
+        function bypassDirectToStream() {
+            if(!activeItemContext) return;
+            document.getElementById('details-modal-overlay').classList.remove('active');
+            executeFullscreenVideo();
+        }
+
+        function executeFullscreenVideo() {
+            if(!activeItemContext) return;
+            const fsPage = document.getElementById('fullscreen-player-page');
+            fsPage.classList.add('active');
+
+            document.getElementById('player-hud-title').innerText = activeItemContext.title;
+            document.getElementById('player-hud-meta').innerText = `★ | ${activeItemContext.type === 'series' ? 'TV Series' : 'Movie'}`;
+
+            const container = document.getElementById('video-iframe-container');
+            container.innerHTML = '';
+            let streamUrl = '';
+
+            if(activeItemContext.type === 'series') {
+                const s = selectedSeason || 1;
+                const e = selectedEpisode || 1;
+                streamUrl = tvServers[selectedServer].replace('{tmdb}', activeItemContext.id).replace('{s}', s).replace('{e}', e);
+            } else {
+                streamUrl = movieServers[selectedServer].replace('{tmdb}', activeItemContext.id);
+            }
+
+            container.innerHTML = `<iframe src="${streamUrl}" allowfullscreen></iframe>`;
+            container.style.display = 'block';
+        }
+
+        function closeFullscreenPlayerPage() {
+            document.getElementById('fullscreen-player-page').classList.remove('active');
+            document.getElementById('video-iframe-container').style.display = 'none';
+            document.getElementById('video-iframe-container').innerHTML = '';
+        }
+
+        function toggleWatchlist(item, btn) {
+            const index = watchlist.findIndex(w => w.id === item.id && w.type === item.type);
+            if(index > -1) {
+                watchlist.splice(index, 1);
+            } else {
+                watchlist.push(item);
+            }
+            localStorage.setItem('cinehub_watchlist', JSON.stringify(watchlist));
+            btn.innerText = index > -1 ? '+ Add to List' : '✓ Added to List';
         }
     </script>
 </body>
